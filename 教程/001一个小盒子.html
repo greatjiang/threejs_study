@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一个小盒子</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="../js/three.js"></script>
+  <script>
+    // 场景
+    var scene = new THREE.Scene()
+
+    // 网格模型+光照
+    var geometry = new THREE.BoxGeometry(100, 100, 100)
+    // 网格材质 漫反射
+    var material = new THREE.MeshLambertMaterial({
+      color: 0xa4d6f4
+    })
+    var mesh = new THREE.Mesh(geometry, material)
+    scene.add(mesh)
+
+    // 灯光
+    var point = new THREE.PointLight(0xffffff)
+    point.position.set(150, 150, 150)
+    scene.add(point)
+
+    // 相机
+    var width = window.innerWidth
+    var height = window.innerHeight
+    var k = width / height
+    var s = 200 //三维场景显示范围控制系数，系数越大，显示的范围越大
+    var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000)
+    camera.position.set(200, 300, 200)
+    camera.lookAt(scene.position)
+
+    // 渲染
+    var renderer = new THREE.WebGLRenderer()
+    renderer.setSize(width, height)
+    renderer.setClearColor(0xffffff, 1)
+    document.body.appendChild(renderer.domElement)
+
+    renderer.render(scene, camera)
+  </script>
+</body>
+
+</html>

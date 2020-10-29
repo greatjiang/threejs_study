@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一个小盒子</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="../js/three.js"></script>
+  <!-- 鼠标操作三维场景 -->
+  <script src="../js/OrbitControls.js"></script>
+  <script>
+    // 场景
+    var scene = new THREE.Scene()
+
+    // 网格模型+光照
+    var geometry = new THREE.BoxGeometry(100, 100, 100)
+
+    // 纹理贴图映射到一个矩形平面上
+    var textureLoader = new THREE.TextureLoader()
+    var material = new THREE.MeshPhongMaterial({
+      color: 0xa4d6f4,
+    })
+    var mesh = new THREE.Mesh(geometry, material)
+    scene.add(mesh)
+
+    // //聚光源
+    // var spotLight = new THREE.SpotLight(0xffffff);
+    // spotLight.position.set(150, 150, 150);
+    // scene.add(spotLight); //点光源添加到场景中
+
+    // var spotLightHelper = new THREE.SpotLightHelper(spotLight)
+    // scene.add(spotLightHelper)
+
+    // 点光源 创建一个虚拟的球形网格 Mesh 的辅助对象来模拟 点光源 PointLight.
+    // var pointLight = new THREE.PointLight(0xffffff)// 光照颜色、光照强度、光照距离
+    // pointLight.position.set(0, 150, 150)
+    // scene.add(pointLight)
+
+    // var pointLightHelper = new THREE.PointLightHelper(pointLight,1)
+    // scene.add(pointLightHelper)
+
+    // 平行光
+    var light = new THREE.DirectionalLight(0xFFFFFF);
+    light.position.set(0, 150, 150)
+    scene.add(light)
+
+    light.target = mesh
+    var helper = new THREE.DirectionalLightHelper(light,50);
+    scene.add(helper);
+
+    // 辅助三维坐标系
+    var axisHelper = new THREE.AxisHelper(300)
+    scene.add(axisHelper)
+
+    // 相机
+    var width = window.innerWidth
+    var height = window.innerHeight
+    var k = width / height
+    var s = 200
+    var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000)
+    camera.position.set(200, 300, 200)
+    camera.lookAt(scene.position)
+
+    // 渲染
+    var renderer = new THREE.WebGLRenderer()
+    renderer.setSize(width, height)
+    renderer.setClearColor(0xcccccc, 1)
+    document.body.appendChild(renderer.domElement)
+
+    renderer.render(scene, camera)
+
+    function render() {
+      renderer.render(scene, camera)
+    }
+
+    var controls = new THREE.OrbitControls(camera, renderer.domElement)
+    controls.addEventListener('change', render)
+    render()
+  </script>
+</body>
+
+</html>

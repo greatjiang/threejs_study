@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一个小盒子</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="../js/three.js"></script>
+  <!-- 鼠标操作三维场景 -->
+  <script src="../js/OrbitControls.js"></script>
+  <script>
+    // 场景
+    var scene = new THREE.Scene()
+    var group = new THREE.Group()
+
+    var geometry = new THREE.SphereGeometry(50, 32, 32)
+    var material = new THREE.MeshLambertMaterial({
+      color: 0xa4d6f4
+    })
+    var mesh = new THREE.Mesh(geometry, material)
+    mesh.name = 'Sphere'
+    scene.add(mesh)
+
+    group.add(mesh)
+    scene.add(group)
+
+    // 创建名为Box对象的关键帧数据
+    var times = [0, 10]; //关键帧时间数组，离散的时间点序列
+    var values = [
+      0, 0, 0, 
+      0, 0, 0
+    ]; //与时间点对应的值组成的数组
+    // 创建位置关键帧对象：0时刻对应位置0, 0, 0   10时刻对应位置150, 0, 0
+    var posTrack = new THREE.KeyframeTrack('Sphere.position', times, values);
+    // 创建颜色关键帧对象：10时刻对应颜色1, 0, 0   20时刻对应颜色0, 0, 1
+    var colorKF = new THREE.KeyframeTrack('Sphere.material.color', [0, 10], [1, 0, 0, 0, 0, 1]);
+    // 创建名为Sphere对象的关键帧数据  从0~20时间段，尺寸scale缩放3倍
+    var scaleTrack = new THREE.KeyframeTrack('Sphere.scale', [0, 10], [1, 1, 1, 2, 2, 2]);
+
+    // duration决定了默认的播放时间，一般取所有帧动画的最大时间
+    // duration偏小，帧动画数据无法播放完，偏大，播放完帧动画会继续空播放
+    var duration = 20;
+    // 多个帧动画作为元素创建一个剪辑clip对象，命名"default"，持续时间20
+    var clip = new THREE.AnimationClip("default", duration, [posTrack, colorKF, scaleTrack]);
+
+    /**
+     * 播放编辑好的关键帧数据
+     */
+    // group作为混合器的参数，可以播放group中所有子对象的帧动画
+    var mixer = new THREE.AnimationMixer(group);
+    // 剪辑clip作为参数，通过混合器clipAction方法返回一个操作对象AnimationAction
+    var AnimationAction = mixer.clipAction(clip);
+    //通过操作Action设置播放方式
+    AnimationAction.timeScale = 20; //默认1，可以调节播放速度
+    // AnimationAction.loop = THREE.LoopOnce; //不循环播放
+    AnimationAction.play(); //开始播放
+    // 聚光光源
+    var spotLight = new THREE.SpotLight(0xffffff)
+    spotLight.position.set(120, 120, 120)
+    spotLight.angle = Math.PI
+    scene.add(spotLight)
+
+    // 辅助三维坐标系
+    var axisHelper = new THREE.AxisHelper(300)
+    scene.add(axisHelper)
+
+    // 相机
+    var width = window.innerWidth
+    var height = window.innerHeight
+    var k = width / height
+    var s = 200
+    var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000)
+    camera.position.set(200, 200, 200)
+    camera.lookAt(scene.position)
+
+    // 渲染
+    var renderer = new THREE.WebGLRenderer()
+    renderer.setSize(width, height)
+    renderer.setClearColor(0xcccccc, 1)
+    document.body.appendChild(renderer.domElement)
+    renderer.shadowMap.enabled = true;
+
+    renderer.render(scene, camera)
+
+    // function render() {
+    //   renderer.render(scene, camera)
+    // }
+    // 创建一个时钟对象Clock
+    var clock = new THREE.Clock();
+    // 渲染函数
+    function render() {
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+      //clock.getDelta()方法获得两帧的时间间隔
+      // 更新混合器相关的时间
+      mixer.update(clock.getDelta());
+    }
+
+    var controls = new THREE.OrbitControls(camera, renderer.domElement)
+    controls.addEventListener('change', render)
+    render()
+  </script>
+</body>
+
+</html>
